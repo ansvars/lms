@@ -1,6 +1,30 @@
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
-// ====================== EXISTING USER FUNCTIONS (UNCHANGED) ======================
+// ====================== AUTH FUNCTION ======================
+export const loginUser = async (email, password) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Login failed');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Login Error:', error);
+    throw error;
+  }
+};
+
+// ====================== USER MANAGEMENT ======================
 export const fetchUsers = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/users`, {
@@ -45,7 +69,7 @@ export const addUser = async (userData) => {
   }
 };
 
-// ====================== TEST FUNCTIONS (UPDATED WITH NEW REQUIREMENTS) ======================
+// ====================== TEST MANAGEMENT ======================
 export const getTests = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/tests`, {
@@ -67,7 +91,6 @@ export const getTests = async () => {
   }
 };
 
-// Renamed from fetchTestDetails to getTestDetails to match your existing code
 export const getTestDetails = async (testId) => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/tests/${testId}`, {
@@ -84,7 +107,6 @@ export const getTestDetails = async (testId) => {
 
     const testData = await response.json();
     
-    // Ensure the test data has the required structure
     return {
       id: testData.id,
       name: testData.name,
@@ -180,12 +202,13 @@ export const uploadTestImage = async (file, testId, questionId) => {
   }
 };
 
-// ====================== EXPORT OBJECT (MAINTAINING EXISTING STRUCTURE) ======================
+// ====================== EXPORT OBJECT ======================
 export default {
+  loginUser,
   fetchUsers,
   addUser,
   getTests,
-  getTestDetails,  // This is the function your TestViewer will use
+  getTestDetails,
   createTest,
   submitTestAnswers,
   uploadTestImage
