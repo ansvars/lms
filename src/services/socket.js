@@ -4,6 +4,9 @@ import { io } from 'socket.io-client';
 const SOCKET_URL = 'https://lms-ufss.onrender.com';
 
 export const socket = io(SOCKET_URL, {
-  transports: ['websocket', 'polling'],
-  withCredentials: true
-});
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+    transports: ['websocket', 'polling'],
+    withCredentials: true
+  });

@@ -1,14 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './HomePage.css';
-import io from 'socket.io-client';
 import { socket } from '../services/socket';
 
-// Initialize socket connection
-const socket = io('http://localhost:5000', {
-  reconnection: true,
-  reconnectionAttempts: 5,
-  reconnectionDelay: 1000
-});
 
 const HomePage = () => {
   const [activeTab, setActiveTab] = useState("Today");
