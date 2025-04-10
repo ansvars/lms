@@ -28,11 +28,11 @@
     "react-app-rewired": "^2.2.1"
   },
   "scripts": {
-    "start": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
-    "build": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "build": "echo 'Skipping React build for backend'",
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
+  
   "eslintConfig": {
     "extends": [
       "react-app",
