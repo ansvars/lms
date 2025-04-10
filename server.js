@@ -11,7 +11,7 @@ const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
     origin: [
-      process.env.FRONTEND_URL || 'https://your-frontend.vercel.app',
+      process.env.FRONTEND_URL || 'https://convin-lms.vercel.app',
       'http://localhost:5001'
     ],
     methods: ["GET", "POST"],
@@ -41,25 +41,31 @@ const transporter = nodemailer.createTransport({
 // Middleware
 app.use(cors({
   origin: [
-    process.env.FRONTEND_URL || 'https://your-frontend.vercel.app',
+    process.env.FRONTEND_URL || 'https://convin-lms.vercel.app',
     'http://localhost:5001' // Keep for local development
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  credentials: true,
+  exposedHeaders: ['Set-Cookie']
 }));
 app.use(express.json());
 
 const session = require('express-session');
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-strong-secret-key',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+  proxy: true, // Add this for HTTPS
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    domain: process.env.NODE_ENV === 'production' 
+      ? '.onrender.com' 
+      : 'localhost'
   }
 }));
 
