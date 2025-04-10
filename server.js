@@ -10,22 +10,20 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:5001",
+    origin: process.env.FRONTEND_URL || 'https://convin-lms.vercel.app',
     methods: ["GET", "POST"]
   }
 });
-
-// Database pool configuration
+// NEW Configuration using Railway MySQL
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'talentlms_user',
-  password: process.env.DB_PASSWORD || 'AA11',
-  database: process.env.DB_NAME || 'talentlms',
+  uri: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false // Required for Railway
+  },
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
 });
-
 // Email configuration
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -37,7 +35,7 @@ const transporter = nodemailer.createTransport({
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5001',
+  origin: process.env.FRONTEND_URL || 'https://convin-lms.vercel.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
