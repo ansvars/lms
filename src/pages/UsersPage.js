@@ -17,6 +17,7 @@ const UsersPage = () => {
     }
   });
 
+  // 1. FETCH USERS ==============================================
   const fetchUsers = async () => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
@@ -47,7 +48,41 @@ const UsersPage = () => {
     }
   };
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => { 
+    fetchUsers(); 
+  }, []);
+
+  // 2. INPUT HANDLING ===========================================
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setState(prev => ({
+      ...prev,
+      form: {
+        ...prev.form,
+        [name]: type === 'checkbox' ? checked : value
+      }
+    }));
+  };
+
+  // 3. USER ACTIONS =============================================
+  const handleEdit = (user) => {
+    setState(prev => ({
+      ...prev,
+      editingUser: user,
+      showModal: true,
+      form: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        password: ''
+      }
+    }));
+  };
+
+  const handleReports = (userId) => {
+    console.log(`Generate reports for user ${userId}`);
+    // Implement reports functionality here
+  };
 
   const handleDelete = async (userId) => {
     if (!window.confirm('Are you sure you want to permanently delete this user?')) {
@@ -69,7 +104,7 @@ const UsersPage = () => {
         throw new Error(errorData.error || errorData || 'Failed to delete user');
       }
 
-      await fetchUsers(); // Refresh the list after deletion
+      await fetchUsers();
     } catch (error) {
       setState(prev => ({
         ...prev,
@@ -78,6 +113,7 @@ const UsersPage = () => {
     }
   };
 
+  // 4. FORM SUBMISSION ==========================================
   const handleSubmit = async (e) => {
     e.preventDefault();
     setState(prev => ({ ...prev, isSubmitting: true }));
@@ -108,7 +144,7 @@ const UsersPage = () => {
         throw new Error(responseData.error || responseData || 'Failed to save user');
       }
 
-      await fetchUsers(); // Refresh the list after successful update
+      await fetchUsers();
       
       setState(prev => ({
         ...prev,
@@ -131,6 +167,7 @@ const UsersPage = () => {
     }
   };
 
+  // RENDER SECTION ==============================================
   if (state.loading) return <div className="loading">Loading users...</div>;
   if (state.error) return <div className="error">Error: {state.error}</div>;
 
