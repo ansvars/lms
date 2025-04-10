@@ -49,6 +49,11 @@ app.use(cors({
   credentials: true,
   exposedHeaders: ['Set-Cookie']
 }));
+
+app.use((req, res, next) => {
+  res.header('Content-Type', 'application/json');
+  next();
+});
 app.use(express.json());
 
 const session = require('express-session');

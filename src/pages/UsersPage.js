@@ -21,11 +21,10 @@ const UsersPage = () => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       
-      const response = await fetch('/api/users', {
-        headers: { 'Accept': 'application/json' },
-        credentials: 'include'
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/users`, {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
       });
-
       if (!response.ok) {
         throw new Error('Failed to fetch users');
       }
