@@ -1,4 +1,7 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL;
+const API_BASE_URL = "https://lms-ufss.onrender.com"
+// const API_BASE_URL = process.env.REACT_APP_API_URL; // 
+
+
 
 // ====================== AUTH FUNCTION ======================
 export const loginUser = async (email, password) => {
