@@ -29,3 +29,11 @@ node_modules/
 build/
 .DS_Store
 package-lock.json (optional - some include it)
+
+
+
+# .gitignore
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
