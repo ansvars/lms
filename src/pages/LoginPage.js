@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
+import { socket } from '../services/socket';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');

@@ -10,9 +10,14 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'https://convin-lms.vercel.app',
-    methods: ["GET", "POST"]
-  }
+    origin: [
+      process.env.FRONTEND_URL || 'https://your-frontend.vercel.app',
+      'http://localhost:5001'
+    ],
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  transports: ['websocket', 'polling'] // Explicitly enable both
 });
 // NEW Configuration using Railway MySQL
 const pool = mysql.createPool({
@@ -35,7 +40,10 @@ const transporter = nodemailer.createTransport({
 
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'https://convin-lms.vercel.app',
+  origin: [
+    process.env.FRONTEND_URL || 'https://your-frontend.vercel.app',
+    'http://localhost:5001' // Keep for local development
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true

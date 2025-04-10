@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './HomePage.css';
 import io from 'socket.io-client';
+import { socket } from '../services/socket';
 
 // Initialize socket connection
 const socket = io('http://localhost:5000', {
