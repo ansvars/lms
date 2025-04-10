@@ -50,6 +50,20 @@ app.use(cors({
 }));
 app.use(express.json());
 
+const session = require('express-session');
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-strong-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
+
 // Utility functions
 function generateRandomPassword(length = 12) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
@@ -175,6 +189,13 @@ app.post('/auth/login', async (req, res) => {
   
   // Super Admin Login
   if (email === 'me@anshul.com' && password === 'anshul11') {
+    req.session.user = {
+      id: 0,
+      firstName: 'Super',
+      lastName: 'Admin',
+      email: 'me@anshul.com'
+    };
+    
     logActivity('LOGIN', 0, 'Super Admin', 'logged in');
     return res.json({
       success: true,
@@ -200,6 +221,14 @@ app.post('/auth/login', async (req, res) => {
     if (user.password !== password) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+    
+    // Set session
+    req.session.user = {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email
+    };
     
     await pool.query('UPDATE users SET lastLogin = ? WHERE id = ?', [new Date().toLocaleString(), user.id]);
     logActivity('LOGIN', user.id, `${user.firstName} ${user.lastName}`, 'logged in');
