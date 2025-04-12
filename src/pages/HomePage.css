@@ -1,29 +1,29 @@
 /* Full Page Layout */
-html, body {
+body, html {
   margin: 0;
   padding: 0;
-  min-height: 100%;
+  height: 100%;
+  width: 100%;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ed 100%);
+  overflow-x: hidden;
 }
 
-/* Dashboard Container: Responsive, centered, and flexible height */
 .dashboard-container {
   width: 100%;
-  max-width: 1200px;       /* Maximum container width on large screens */
-  min-height: 100vh;       /* Container grows to at least the full viewport height */
-  margin: 0 auto;          /* Center horizontally */
-  padding: 25px;
+  max-width: 1400px;
+  min-height: 85vh;
+  margin: 0 auto;
+  padding: 20px;
   box-sizing: border-box;
   background: white;
   border-radius: 15px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   display: grid;
   grid-template-rows: auto auto auto 1fr;
-  gap: 25px;
+  gap: 20px;
 }
 
-/* Header */
 .dashboard-header {
   display: flex;
   justify-content: space-between;
@@ -42,9 +42,8 @@ html, body {
 /* Overview Section */
 .overview-section {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 20px;
-  height: 130px; /* You can adjust or remove this fixed height if needed */
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 15px;
 }
 
 .overview-card {
@@ -57,6 +56,7 @@ html, body {
   border-top: 4px solid;
   position: relative;
   overflow: hidden;
+  height: 100px;
 }
 
 .overview-card:hover {
@@ -93,10 +93,9 @@ html, body {
 
 /* Metrics Section */
 .metrics-section {
-  min-height: 180px; /* Allow flexible growth */
   background: white;
   border-radius: 12px;
-  padding: 25px;
+  padding: 20px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
@@ -104,13 +103,13 @@ html, body {
   display: flex;
   margin-bottom: 20px;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .time-tab {
-  padding: 8px 20px;
+  padding: 8px 15px;
   border: none;
   background: #f1f3f5;
-  margin-right: 0;
   border-radius: 20px;
   cursor: pointer;
   font-size: 14px;
@@ -131,9 +130,8 @@ html, body {
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
-  height: calc(100% - 50px);
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
 }
 
 .metric-card {
@@ -143,6 +141,7 @@ html, body {
   padding: 15px;
   background: #f8f9fa;
   border-radius: 10px;
+  min-height: 100px;
 }
 
 .metric-card h4 {
@@ -173,44 +172,47 @@ html, body {
   font-size: 16px;
 }
 
-.trend-up {
-  color: #2ecc71;
-}
-
-.trend-down {
-  color: #e74c3c;
-}
-
-.trend-neutral {
-  color: #95a5a6;
-}
+.trend-up { color: #2ecc71; }
+.trend-down { color: #e74c3c; }
+.trend-neutral { color: #95a5a6; }
 
 /* Timeline Section */
 .timeline-section {
   background: white;
   border-radius: 12px;
-  padding: 25px;
+  padding: 20px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  min-height: 250px;
 }
 
 .timeline-section h2 {
   font-size: 18px;
-  margin: 0 0 20px 0;
+  margin: 0 0 15px 0;
   color: #2c3e50;
   font-weight: 600;
 }
 
-.timeline-feed {
-  overflow-y: auto;
-  flex-grow: 1;
-  padding-right: 10px;
-  padding-bottom: 30px; /* Extra space for scroll indicator */
+.timeline-container {
+  position: relative;
+  height: 100%;
+  min-height: 200px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #f8f9fa;
 }
 
-/* Timeline Event */
+.timeline-feed {
+  overflow-y: auto;
+  height: 100%;
+  padding: 15px;
+  padding-bottom: 60px; /* Extra space for scroll indicator */
+  scrollbar-width: thin;
+  scrollbar-color: #bdc3c7 #f1f1f1;
+}
+
 .timeline-event {
   display: flex;
   align-items: center;
@@ -257,7 +259,7 @@ html, body {
   font-weight: 500;
 }
 
-/* Timeline Event Type Colors */
+/* Event Type Colors */
 .timeline-event.login { background-color: #e8f8f5; }
 .timeline-event.login .event-badge { background-color: #2ecc71; }
 .timeline-event.delete { background-color: #fdedec; }
@@ -274,6 +276,47 @@ html, body {
 .timeline-event.registration .event-badge { background-color: #e67e22; }
 .timeline-event.update { background-color: #fef9e7; }
 .timeline-event.update .event-badge { background-color: #f1c40f; }
+
+/* Scroll Indicator */
+.scroll-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(to top, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 10px;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.timeline-feed:not(:hover) ~ .scroll-indicator {
+  opacity: 1;
+}
+
+.scroll-arrow {
+  font-size: 20px;
+  color: #7f8c8d;
+  animation: bounce 2s infinite;
+}
+
+.scroll-text {
+  font-size: 12px;
+  color: #7f8c8d;
+  font-weight: 500;
+  margin-top: 5px;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-5px); }
+  60% { transform: translateY(-3px); }
+}
 
 /* Connection Status */
 .connection-status {
@@ -333,7 +376,7 @@ html, body {
   font-size: 14px;
 }
 
-/* Custom Scrollbar for Timeline Feed */
+/* Custom Scrollbar */
 .timeline-feed::-webkit-scrollbar {
   width: 8px;
 }
@@ -353,73 +396,103 @@ html, body {
   background: #95a5a6;
 }
 
-/* Timeline Container with Scroll Indicator */
-.timeline-container {
-  position: relative;
-  height: 100%;
-  overflow: hidden;
-  border-radius: 10px;
-  background: #f8f9fa;
-}
-
-.scroll-indicator {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: linear-gradient(to top, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 100%);
+/* Side Navigation Styles */
+.side-nav {
+  height: 100vh;
+  width: 100%;
   display: flex;
   flex-direction: column;
+  background-color: white;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+}
+
+.user-profile {
+  padding: 20px;
+  display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding-bottom: 10px;
-  pointer-events: none;
-  opacity: 1;
-  transition: opacity 0.3s ease;
+  border-bottom: 1px solid #eaeef2;
 }
 
-.timeline-feed:not(:hover) ~ .scroll-indicator {
-  opacity: 1;
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
-.scroll-arrow {
-  font-size: 20px;
+.nav-link {
+  padding: 15px 20px;
   color: #7f8c8d;
-  animation: bounce 2s infinite;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
 }
 
-.scroll-text {
-  font-size: 12px;
-  color: #7f8c8d;
-  font-weight: 500;
-  margin-top: 5px;
+.nav-link:hover, .nav-link.active {
+  background-color: #f8f9fa;
+  color: #3498db;
+  border-left-color: #3498db;
 }
 
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-5px);
-  }
-  60% {
-    transform: translateY(-3px);
-  }
-}
-
-/* Optional: Styling for the Logout Button */
 .logout-button {
-  display: inline-block;
-  padding: 10px 20px;
-  background: #e74c3c;
-  color: white;
+  margin: 20px;
+  padding: 12px;
+  background-color: #f8f9fa;
+  color: #e74c3c;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
 .logout-button:hover {
-  background: #c0392b;
+  background-color: #fdedec;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+  .dashboard-container {
+    width: 95%;
+    padding: 15px;
+  }
+  
+  .overview-section {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    width: 100%;
+    border-radius: 0;
+    padding: 10px;
+  }
+  
+  .overview-section {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .time-tabs {
+    overflow-x: auto;
+    padding-bottom: 5px;
+  }
+  
+  .time-tab {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 20px;
+  }
 }
