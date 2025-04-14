@@ -146,11 +146,12 @@ async function initializeDatabase() {
         name VARCHAR(255) NOT NULL,
         description TEXT,
         time_limit INT DEFAULT NULL,
-        created_by INT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        created_by INT NULL,
         FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-    `); 
+    `);
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS questions (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -162,7 +163,7 @@ async function initializeDatabase() {
         FOREIGN KEY (test_id) REFERENCES tests(id) ON DELETE CASCADE
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
-    
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS options (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -171,29 +172,6 @@ async function initializeDatabase() {
         image_url VARCHAR(255) DEFAULT NULL,
         correct BOOLEAN DEFAULT FALSE,
         FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-    `);
-
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS user_activities (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        type ENUM('LOGIN', 'ADD', 'DELETE', 'UPDATE', 'COMPLETION', 'CERTIFICATE', 'PASSED') NOT NULL,
-        user_id INT NULL,
-        user_name VARCHAR(100),
-        action VARCHAR(255),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-    `);
-
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS tests (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        doc_url TEXT NOT NULL,
-        created_by INT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
@@ -610,12 +588,8 @@ app.post('/api/tests', async (req, res) => {
     }
 
     const [result] = await conn.query(
-      'INSERT INTO tests SET ?',
-      { 
-        name, 
-        description: description || null,
-        time_limit: timeLimit || null
-      }
+      'INSERT INTO tests (name, description, time_limit) VALUES (?, ?, ?)',
+      [name, description || null, timeLimit || null]
     );
 
     await conn.commit();
@@ -632,7 +606,7 @@ app.post('/api/tests', async (req, res) => {
     await conn.rollback();
     conn.release();
     console.error('POST /api/tests error:', error);
-    res.status(500).json({ error: 'Failed to create test' });
+    res.status(500).json({ error: 'Failed to create test', details: error.message });
   }
 });
 
