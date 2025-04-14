@@ -1,7 +1,5 @@
-const API_BASE_URL = "https://lms-ufss.onrender.com"
+const API_BASE_URL = "https://lms-ufss.onrender.com";
 // const API_BASE_URL = process.env.REACT_APP_API_URL; // 
-
-
 
 // ====================== AUTH FUNCTION ======================
 export const loginUser = async (email, password) => {
@@ -108,26 +106,7 @@ export const getTestDetails = async (testId) => {
       throw new Error(error.message || 'Failed to fetch test details');
     }
 
-    const testData = await response.json();
-    
-    return {
-      id: testData.id,
-      name: testData.name,
-      description: testData.description || '',
-      timeLimit: testData.timeLimit || null,
-      questions: testData.questions.map(q => ({
-        id: q.id,
-        text: q.text,
-        imageUrl: q.imageUrl || null,
-        points: q.points || 1,
-        multiple: q.multiple || false,
-        options: q.options.map((opt, index) => ({
-          text: opt.text || `Option ${index + 1}`,
-          imageUrl: opt.imageUrl || null,
-          correct: opt.correct || false
-        }))
-      }))
-    };
+    return await response.json();
   } catch (error) {
     console.error('API Error:', error);
     throw error;
@@ -205,8 +184,8 @@ export const uploadTestImage = async (file, testId, questionId) => {
   }
 };
 
-// ====================== EXPORT OBJECT ======================
-export default {
+// Create a named object for export
+const apiService = {
   loginUser,
   fetchUsers,
   addUser,
@@ -216,3 +195,5 @@ export default {
   submitTestAnswers,
   uploadTestImage
 };
+
+export default apiService;

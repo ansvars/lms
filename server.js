@@ -141,14 +141,36 @@ async function logActivity(type, userId, userName, action) {
 async function initializeDatabase() {
   try {
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS users (
+      CREATE TABLE IF NOT EXISTS tests (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        firstName VARCHAR(50) NOT NULL,
-        lastName VARCHAR(50) NOT NULL,
-        email VARCHAR(100) NOT NULL UNIQUE,
-        password VARCHAR(100),
-        registrationDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        lastLogin VARCHAR(50)
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        time_limit INT DEFAULT NULL,
+        created_by INT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `); 
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS questions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        test_id INT NOT NULL,
+        text TEXT NOT NULL,
+        image_url VARCHAR(255) DEFAULT NULL,
+        points INT DEFAULT 1,
+        multiple BOOLEAN DEFAULT FALSE,
+        FOREIGN KEY (test_id) REFERENCES tests(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+    
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS options (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        question_id INT NOT NULL,
+        text TEXT NOT NULL,
+        image_url VARCHAR(255) DEFAULT NULL,
+        correct BOOLEAN DEFAULT FALSE,
+        FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
@@ -571,28 +593,29 @@ app.get('/api/tests/:testId', async (req, res) => {
     res.status(500).json({ error: "Failed to fetch test" });
   }
 });
+// Replace the existing /api/tests routes with:
+
+// Create test
 app.post('/api/tests', async (req, res) => {
   const conn = await pool.getConnection();
   await conn.beginTransaction();
 
   try {
-    const { name, docUrl } = req.body;
+    const { name, description, timeLimit } = req.body;
     
-    if (!name || !docUrl) {
+    if (!name) {
       await conn.rollback();
       conn.release();
-      return res.status(400).json({ error: 'Name and Google Doc URL are required' });
-    }
-
-    if (!docUrl.includes('docs.google.com/document/d/')) {
-      await conn.rollback();
-      conn.release();
-      return res.status(400).json({ error: 'Invalid Google Docs URL format' });
+      return res.status(400).json({ error: 'Test name is required' });
     }
 
     const [result] = await conn.query(
       'INSERT INTO tests SET ?',
-      { name, doc_url: docUrl }
+      { 
+        name, 
+        description: description || null,
+        time_limit: timeLimit || null
+      }
     );
 
     await conn.commit();
@@ -601,7 +624,8 @@ app.post('/api/tests', async (req, res) => {
     res.status(201).json({ 
       id: result.insertId,
       name,
-      docUrl,
+      description,
+      timeLimit,
       createdAt: new Date()
     });
   } catch (error) {
@@ -609,6 +633,133 @@ app.post('/api/tests', async (req, res) => {
     conn.release();
     console.error('POST /api/tests error:', error);
     res.status(500).json({ error: 'Failed to create test' });
+  }
+});
+
+// Add question to test
+app.post('/api/tests/:testId/questions', async (req, res) => {
+  const conn = await pool.getConnection();
+  await conn.beginTransaction();
+
+  try {
+    const testId = req.params.testId;
+    const { text, points, multiple } = req.body;
+
+    if (!text) {
+      await conn.rollback();
+      conn.release();
+      return res.status(400).json({ error: 'Question text is required' });
+    }
+
+    const [result] = await conn.query(
+      'INSERT INTO questions SET ?',
+      { 
+        test_id: testId,
+        text,
+        points: points || 1,
+        multiple: multiple || false
+      }
+    );
+
+    await conn.commit();
+    conn.release();
+
+    res.status(201).json({ 
+      id: result.insertId,
+      testId,
+      text,
+      points: points || 1,
+      multiple: multiple || false
+    });
+  } catch (error) {
+    await conn.rollback();
+    conn.release();
+    console.error('POST /api/tests/:testId/questions error:', error);
+    res.status(500).json({ error: 'Failed to add question' });
+  }
+});
+
+// Add option to question
+app.post('/api/questions/:questionId/options', async (req, res) => {
+  const conn = await pool.getConnection();
+  await conn.beginTransaction();
+
+  try {
+    const questionId = req.params.questionId;
+    const { text, correct } = req.body;
+
+    if (!text) {
+      await conn.rollback();
+      conn.release();
+      return res.status(400).json({ error: 'Option text is required' });
+    }
+
+    const [result] = await conn.query(
+      'INSERT INTO options SET ?',
+      { 
+        question_id: questionId,
+        text,
+        correct: correct || false
+      }
+    );
+
+    await conn.commit();
+    conn.release();
+
+    res.status(201).json({ 
+      id: result.insertId,
+      questionId,
+      text,
+      correct: correct || false
+    });
+  } catch (error) {
+    await conn.rollback();
+    conn.release();
+    console.error('POST /api/questions/:questionId/options error:', error);
+    res.status(500).json({ error: 'Failed to add option' });
+  }
+});
+
+// Get test with questions and options
+app.get('/api/tests/:testId', async (req, res) => {
+  try {
+    const testId = req.params.testId;
+
+    // Get test details
+    const [tests] = await pool.query(
+      'SELECT * FROM tests WHERE id = ?',
+      [testId]
+    );
+
+    if (tests.length === 0) {
+      return res.status(404).json({ error: 'Test not found' });
+    }
+
+    // Get questions
+    const [questions] = await pool.query(
+      'SELECT * FROM questions WHERE test_id = ?',
+      [testId]
+    );
+
+    // Get options for each question
+    const testWithQuestions = {
+      ...tests[0],
+      questions: await Promise.all(questions.map(async (question) => {
+        const [options] = await pool.query(
+          'SELECT * FROM options WHERE question_id = ?',
+          [question.id]
+        );
+        return {
+          ...question,
+          options
+        };
+      }))
+    };
+
+    res.json(testWithQuestions);
+  } catch (error) {
+    console.error('GET /api/tests/:testId error:', error);
+    res.status(500).json({ error: 'Failed to fetch test' });
   }
 });
 

@@ -1,26 +1,28 @@
-export default function TestList({ tests, onTestSelect }) {
+// src/pages/TestPage/TestList.js
+import React from 'react';
+import { Link } from 'react-router-dom';
+import './TestPage.css';
+
+const TestList = ({ tests }) => {
   if (tests.length === 0) {
-    return <div className="no-tests">No tests created yet</div>;
+    return <div className="no-tests">No tests created yet.</div>;
   }
 
   return (
     <div className="test-list">
-      <h3>Your Tests</h3>
+      <h2>Your Tests</h2>
       <ul>
         {tests.map((test) => (
-          <li key={test.id} className="test-item">
-            <div className="test-name">{test.name}</div>
-            <div className="test-actions">
-              <button 
-                onClick={() => onTestSelect(test.id)}
-                className="view-test-btn"
-              >
-                View Test
-              </button>
-            </div>
+          <li key={test.id}>
+            <Link to={`/tests/${test.id}`}>
+              <h3>{test.name}</h3>
+              <p>Questions: {test.questions?.length || 0}</p>
+            </Link>
           </li>
         ))}
       </ul>
     </div>
   );
-}
+};
+
+export default TestList;

@@ -1,39 +1,51 @@
-import { useState } from 'react';
+// src/pages/TestPage/CreateTestModal.js
+import React, { useState } from 'react';
+import './TestPage.css';
 
-export default function CreateTestModal({ onClose, onCreate }) {
+const CreateTestModal = ({ onClose, onSubmit }) => {
   const [testName, setTestName] = useState('');
-  const [docUrl, setDocUrl] = useState('');
+  const [questionCount, setQuestionCount] = useState(10);
 
-  const handleSubmit = () => {
-    if (!testName.trim() || !docUrl.trim()) {
-      alert('Please fill all fields');
-      return;
-    }
-    onCreate({ name: testName, docUrl });
-    onClose();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit({
+      name: testName,
+      questionCount: parseInt(questionCount)
+    });
   };
 
   return (
     <div className="modal-overlay">
-      <div className="modal">
+      <div className="modal-content">
         <h2>Create New Test</h2>
-        <input
-          type="text"
-          placeholder="Test Name"
-          value={testName}
-          onChange={(e) => setTestName(e.target.value)}
-        />
-        <input
-          type="url"
-          placeholder="Google Doc URL"
-          value={docUrl}
-          onChange={(e) => setDocUrl(e.target.value)}
-        />
-        <div className="modal-actions">
-          <button onClick={handleSubmit}>Create</button>
-          <button onClick={onClose}>Cancel</button>
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Test Name:</label>
+            <input 
+              type="text" 
+              value={testName}
+              onChange={(e) => setTestName(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Number of Questions:</label>
+            <input 
+              type="number" 
+              value={questionCount}
+              onChange={(e) => setQuestionCount(e.target.value)}
+              min="1"
+              required
+            />
+          </div>
+          <div className="form-actions">
+            <button type="button" onClick={onClose}>Cancel</button>
+            <button type="submit">Create Questions</button>
+          </div>
+        </form>
       </div>
     </div>
   );
-}
+};
+
+export default CreateTestModal;
