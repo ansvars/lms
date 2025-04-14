@@ -574,12 +574,13 @@ app.get('/api/tests/:testId', async (req, res) => {
 // Replace the existing /api/tests routes with:
 
 // Create test
+// In your server.js, change the test creation endpoint to:
 app.post('/api/tests', async (req, res) => {
   const conn = await pool.getConnection();
   await conn.beginTransaction();
 
   try {
-    const { name, description, timeLimit } = req.body;
+    const { name } = req.body; // Only require name
     
     if (!name) {
       await conn.rollback();
@@ -588,8 +589,8 @@ app.post('/api/tests', async (req, res) => {
     }
 
     const [result] = await conn.query(
-      'INSERT INTO tests (name, description, time_limit) VALUES (?, ?, ?)',
-      [name, description || null, timeLimit || null]
+      'INSERT INTO tests (name) VALUES (?)', // Only insert name
+      [name]
     );
 
     await conn.commit();
@@ -598,15 +599,13 @@ app.post('/api/tests', async (req, res) => {
     res.status(201).json({ 
       id: result.insertId,
       name,
-      description,
-      timeLimit,
       createdAt: new Date()
     });
   } catch (error) {
     await conn.rollback();
     conn.release();
     console.error('POST /api/tests error:', error);
-    res.status(500).json({ error: 'Failed to create test', details: error.message });
+    res.status(500).json({ error: 'Failed to create test' });
   }
 });
 
